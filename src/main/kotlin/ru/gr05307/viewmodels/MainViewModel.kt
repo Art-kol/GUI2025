@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import ru.gr05307.ui.CartesianPainter
+import ru.gr05307.painting.CartesianPainter
 
 class MainViewModel {
     var xMin: Double? by mutableStateOf(-5.0)

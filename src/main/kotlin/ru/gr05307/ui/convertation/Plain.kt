@@ -9,4 +9,5 @@ data class Plain(
     var height: Float,
 ){
     val xDen = width / (xMax - xMin)
+    val yDen = height / (yMax - yMin)
 }
