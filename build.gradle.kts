@@ -20,7 +20,17 @@ dependencies {
     // compose.desktop.currentOs should be used in launcher-sourceSet
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
+    implementation(kotlin("stdlib"))
+
+    // Тестовые библиотеки
+    testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
+
     implementation(compose.desktop.currentOs)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 compose.desktop {
