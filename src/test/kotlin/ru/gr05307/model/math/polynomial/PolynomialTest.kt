@@ -8,7 +8,6 @@ import ru.gr05307.model.math.polynomial.Polynomial
 import ru.gr05307.model.math.polynomial.times
 import kotlin.math.sin
 import kotlin.math.cos
-import kotlin.math.exp
 
 
 class PolynomialTest {
