@@ -32,6 +32,27 @@ class MainViewModel {
         plain = plain
     )
 
+    fun getInterpolatingPolynomial(): ((Double) -> Double)? {
+        if (points.size < 2) return null // мало точек
+
+        // Лагранжев интерполятор
+        return { x ->
+            var sum = 0.0
+            for (i in points.indices) {
+                val xi = points[i].first
+                val yi = points[i].second
+                var term = yi
+                for (j in points.indices) {
+                    if (i != j) {
+                        val xj = points[j].first
+                        term *= (x - xj) / (xi - xj)
+                    }
+                }
+                sum += term
+            }
+            sum
+        }
+    }
 
     fun addPoint(click: Offset) {
         val x = Converter.xScr2Crt(click.x, plain)
@@ -72,14 +93,16 @@ class MainViewModel {
 
         cartesianPainter.draw(scope, measurer)
 
-        val funcPainter = FunctionPainter(
-            size = scope.size,
-            plain = plain,
-            f = { x -> x.pow(4) },
-            color = Color.Red,
-            strokeWidth = 2f
-        )
-        funcPainter.draw(scope, measurer)
+        getInterpolatingPolynomial()?.let { poly ->
+            val funcPainter = FunctionPainter(
+                size = scope.size,
+                plain = plain,
+                f = poly,
+                color = Color.Red,
+                strokeWidth = 2f
+            )
+            funcPainter.draw(scope, measurer)
+        }
 
 
         for ((x, y) in points) {
