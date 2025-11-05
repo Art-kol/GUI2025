@@ -70,7 +70,6 @@ fun ControlPanel(viewModel: MainViewModel) {
             .padding(top = 10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Границы
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Edges("x", viewModel.xMin, viewModel.xMax,
                 { viewModel.xMin = it ?: -5.0; viewModel.updateBounds() },
@@ -84,7 +83,6 @@ fun ControlPanel(viewModel: MainViewModel) {
 
         Divider(color = Color.Gray)
 
-        // Переключатели отображения
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -99,7 +97,6 @@ fun ControlPanel(viewModel: MainViewModel) {
             Text("Производная")
         }
 
-        // Цвета
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically

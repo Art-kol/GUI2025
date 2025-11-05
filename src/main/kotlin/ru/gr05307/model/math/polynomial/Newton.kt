@@ -148,6 +148,17 @@ class Newton : Polynomial {
     }
 
     fun dotsCopy(): Map<Double, Double> = dots.toMap()
+
+    fun copyFrom(other: Newton){
+        this.dots.clear()
+        this.dots.putAll(other.dotsCopy())
+        this.remember_div_diffs = other.remember_div_diffs.copyOf()
+        this.remember_basis_diffs = other.remember_basis_diffs.toMutableList()
+        this.remember_poly = other.remember_poly
+        this.coeffs = other.coeffs
+    }
+
+
 }
 
 /* package ru.smak.math.polynomial

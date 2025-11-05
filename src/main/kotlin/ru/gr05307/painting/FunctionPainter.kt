@@ -30,7 +30,6 @@ class FunctionPainter(
         val w = size.width
         if (w <= 0f) return
 
-        // Чем больше ширина Canvas, тем больше шагов
         val sampleStepPx = (w / 1000f).coerceAtMost(1.0f) // до 1000 семплов на экран
 
         var firstPoint = true
