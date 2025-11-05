@@ -13,17 +13,23 @@ import ru.gr05307.painting.FunctionPainter
 import ru.gr05307.ui.convertation.Converter
 import ru.gr05307.ui.convertation.Plain
 import kotlin.math.abs
-import kotlin.math.pow
+
 
 class MainViewModel {
     private val plain = Plain(-5.0, 5.0, -5.0, 5.0, 0f, 0f)
 
+    var xMin by mutableStateOf(plain.xMin)
+    var xMax by mutableStateOf(plain.xMax)
+    var yMin by mutableStateOf(plain.yMin)
+    var yMax by mutableStateOf(plain.yMax)
 
-    var xMin: Double? by mutableStateOf(plain.xMin)
-    var xMax: Double? by mutableStateOf(plain.xMax)
-    var yMin: Double? by mutableStateOf(plain.yMin)
-    var yMax: Double? by mutableStateOf(plain.yMax)
+    var showPoints by mutableStateOf(true)
+    var showPolynomial by mutableStateOf(true)
+    var showDerivative by mutableStateOf(false)
 
+    var polyColor by mutableStateOf(Color.Red)
+    var pointsColor by mutableStateOf(Color.Green)
+    var derivativeColor by mutableStateOf(Color.Blue)
 
     var points by mutableStateOf(listOf<Pair<Double, Double>>())
 
@@ -32,19 +38,17 @@ class MainViewModel {
         plain = plain
     )
 
+    /** Лагранжев интерполятор */
     fun getInterpolatingPolynomial(): ((Double) -> Double)? {
-        if (points.size < 2) return null // мало точек
-
-        // Лагранжев интерполятор
+        if (points.size < 2) return null
         return { x ->
             var sum = 0.0
             for (i in points.indices) {
-                val xi = points[i].first
-                val yi = points[i].second
+                val (xi, yi) = points[i]
                 var term = yi
                 for (j in points.indices) {
                     if (i != j) {
-                        val xj = points[j].first
+                        val (xj, _) = points[j]
                         term *= (x - xj) / (xi - xj)
                     }
                 }
@@ -54,65 +58,70 @@ class MainViewModel {
         }
     }
 
+    /** Производная лагранжева полинома (численно) */
+    fun getDerivative(): ((Double) -> Double)? {
+        val f = getInterpolatingPolynomial() ?: return null
+        val h = 1e-5
+        return { x -> (f(x + h) - f(x - h)) / (2 * h) }
+    }
+
     fun addPoint(click: Offset) {
         val x = Converter.xScr2Crt(click.x, plain)
         val y = Converter.yScr2Crt(click.y, plain)
-
-        // Проверяем, что нет другой точки слишком близко по X
-        val existsNearby = points.any { abs(it.first - x) < 0.2 }
-        if (existsNearby) return
-
+        if (points.any { abs(it.first - x) < 0.2 }) return
         points = points + (x to y)
     }
 
-
     fun removePoint(click: Offset) {
         if (points.isEmpty()) return
-
         val toRemove = points.minByOrNull {
             val sx = Converter.xCrt2Scr(it.first, plain)
             val sy = Converter.yCrt2Scr(it.second, plain)
             (click - Offset(sx, sy)).getDistance()
-        }
+        } ?: return
 
-        if (toRemove != null) {
-            val dist = (click - Offset(
-                Converter.xCrt2Scr(toRemove.first, plain),
-                Converter.yCrt2Scr(toRemove.second, plain)
-            )).getDistance()
+        val dist = (click - Offset(
+            Converter.xCrt2Scr(toRemove.first, plain),
+            Converter.yCrt2Scr(toRemove.second, plain)
+        )).getDistance()
 
-            if (dist < 10f) { // если клик близко
-                points = points - toRemove
-            }
-        }
+        if (dist < 10f) points = points - toRemove
+    }
+
+    fun updateBounds() {
+        if (xMin >= xMax) xMax = xMin + 0.1
+        if (yMin >= yMax) yMax = yMin + 0.1
+        plain.xMin = xMin
+        plain.xMax = xMax
+        plain.yMin = yMin
+        plain.yMax = yMax
     }
 
     fun draw(scope: DrawScope, measurer: TextMeasurer) {
         plain.width = scope.size.width
         plain.height = scope.size.height
+        updateBounds()
 
         cartesianPainter.draw(scope, measurer)
 
-        getInterpolatingPolynomial()?.let { poly ->
-            val funcPainter = FunctionPainter(
-                size = scope.size,
-                plain = plain,
-                f = poly,
-                color = Color.Red,
-                strokeWidth = 2f
-            )
-            funcPainter.draw(scope, measurer)
+        if (showPolynomial) {
+            getInterpolatingPolynomial()?.let { f ->
+                FunctionPainter(scope.size, plain, f, polyColor, 2f).draw(scope, measurer)
+            }
         }
 
+        if (showDerivative) {
+            getDerivative()?.let { df ->
+                FunctionPainter(scope.size, plain, df, derivativeColor, 2f).draw(scope, measurer)
+            }
+        }
 
-        for ((x, y) in points) {
-            val sx = Converter.xCrt2Scr(x, plain)
-            val sy = Converter.yCrt2Scr(y, plain)
-            scope.drawCircle(
-                color = Color.Green,
-                radius = 6f,
-                center = Offset(sx, sy)
-            )
+        if (showPoints) {
+            for ((x, y) in points) {
+                val sx = Converter.xCrt2Scr(x, plain)
+                val sy = Converter.yCrt2Scr(y, plain)
+                scope.drawCircle(pointsColor, 6f, Offset(sx, sy))
+            }
         }
     }
 }
