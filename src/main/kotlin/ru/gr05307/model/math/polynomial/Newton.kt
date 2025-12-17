@@ -1,6 +1,7 @@
 package ru.gr05307.model.math.polynomial
 
 import ru.gr05307.model.math.neq
+import kotlin.math.pow
 
 class Newton : Polynomial {
 
@@ -157,8 +158,6 @@ class Newton : Polynomial {
         this.remember_poly = other.remember_poly
         this.coeffs = other.coeffs
     }
-
-
 }
 
 /* package ru.smak.math.polynomial
